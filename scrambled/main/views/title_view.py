@@ -1,12 +1,13 @@
 import arcade
+from arcade import shape_list
 
-TILE_SPRITE_SCALING = 0.5
+TILE_SPRITE_SCALING = 1.0
 PLAYER_SCALING = 0.6
 
 WINDOW_WIDTH = 1280
-WINDOW_HEIGHT = 720
+WINDOW_HEIGHT = 640
 WINDOW_TITLE = "Scrambled"
-SPRITE_PIXEL_SIZE = 128
+SPRITE_PIXEL_SIZE = 32
 GRID_PIXEL_SIZE = SPRITE_PIXEL_SIZE * TILE_SPRITE_SCALING
 CAMERA_PAN_SPEED = 0.15
 
@@ -28,7 +29,7 @@ class TitleView(arcade.View):
         self.tile_map = None
 
         # Sprite lists
-        self.player_list = None
+        self.shapes = shape_list.ShapeElementList()
 
         # Set up the player
         self.score = 0
@@ -52,20 +53,13 @@ class TitleView(arcade.View):
         """Set up the game and initialize the variables."""
 
         # Sprite lists
-        self.player_list = arcade.SpriteList()
-
-        # Set up the player
-        self.player_sprite = arcade.Sprite(
-            ":resources:images/animated_characters/female_person/femalePerson_idle.png",
-            scale=PLAYER_SCALING,
-        )
 
         self.game_camera = arcade.Camera2D()
         self.gui_camera = arcade.Camera2D()
 
         self.fps_text = arcade.Text('FPS:', 10, 10, arcade.color.BLACK, 14)
         self.game_over_text = arcade.Text(
-            'GAME OVER',
+            'Scrambled',
             self.window.center_x,
             self.window.center_y,
             arcade.color.BLACK, 30,
@@ -74,10 +68,6 @@ class TitleView(arcade.View):
         )
 
         # Starting position of the player
-        self.player_sprite.center_x = 128
-        self.player_sprite.center_y = 64
-        self.player_list.append(self.player_sprite)
-
         self.load_level(self.level)
 
         self.game_over = False
@@ -87,7 +77,7 @@ class TitleView(arcade.View):
 
         # Read in the tiled map
         self.tile_map = arcade.load_tilemap(
-            f":resources:tiled_maps/level_{level}.json", scaling=TILE_SPRITE_SCALING
+            ":maps:title.json", scaling=TILE_SPRITE_SCALING
         )
 
         # --- Walls ---
@@ -95,16 +85,28 @@ class TitleView(arcade.View):
         # Calculate the right edge of the my_map in pixels
         self.end_of_map = self.tile_map.width * GRID_PIXEL_SIZE
 
-        self.physics_engine = arcade.PhysicsEnginePlatformer(
-            self.player_sprite,
-            self.tile_map.sprite_lists["Platforms"],
-            gravity_constant=GRAVITY,
-        )
-
         # --- Other stuff
         # Set the background color
         if self.tile_map.background_color:
             self.window.background_color = self.tile_map.background_color
+
+
+
+        # This is a large rectangle that fills the whole
+        # background. The gradient goes between the two colors
+        # top to bottom.
+        color1 = (0, 0, 64)
+        color2 = (64, 128, 192)
+        points = (
+            (0, 0),
+            (WINDOW_WIDTH, 0),
+            (WINDOW_WIDTH, WINDOW_HEIGHT),
+            (0, WINDOW_HEIGHT),
+        )
+        colors = (color1, color1, color2, color2)
+        rect = shape_list.create_rectangle_filled_with_colors(points, colors)
+        self.shapes.append(rect)
+
 
         max_x = GRID_PIXEL_SIZE * self.tile_map.width
         max_y = GRID_PIXEL_SIZE * self.tile_map.height
@@ -126,10 +128,11 @@ class TitleView(arcade.View):
         # This command has to happen before we start drawing
         self.clear()
 
+        self.shapes.draw()
+
         with self.game_camera.activate():
             # Draw all the sprites.
-            self.tile_map.sprite_lists["Platforms"].draw()
-            self.player_list.draw()
+            self.tile_map.sprite_lists["Background"].draw()
 
         with self.gui_camera.activate():
             # Put the text on the screen.
@@ -148,49 +151,11 @@ class TitleView(arcade.View):
         """
         Called whenever the mouse moves.
         """
-        if key == arcade.key.UP:
-            if self.physics_engine.can_jump():
-                self.player_sprite.change_y = JUMP_SPEED
-        elif key == arcade.key.LEFT:
-            self.player_sprite.change_x = -MOVEMENT_SPEED
-        elif key == arcade.key.RIGHT:
-            self.player_sprite.change_x = MOVEMENT_SPEED
+        if key == arcade.key.SPACE:
+            pass #Need to go to main level
 
-    def on_key_release(self, key, modifiers):
-        """
-        Called when the user presses a mouse button.
-        """
-        if key == arcade.key.LEFT or key == arcade.key.RIGHT:
-            self.player_sprite.change_x = 0
 
     def on_update(self, delta_time):
         """Movement and game logic"""
-
-        if self.player_sprite.right >= self.end_of_map:
-            if self.level < self.max_level:
-                self.level += 1
-                self.load_level(self.level)
-                self.player_sprite.center_x = 128
-                self.player_sprite.center_y = 64
-                self.player_sprite.change_x = 0
-                self.player_sprite.change_y = 0
-            else:
-                self.game_over = True
-
-        # Call update on all sprites (The sprites don't do much in this
-        # example though.)
-        if not self.game_over:
-            self.physics_engine.update()
-
-            # --- Manage Scrolling ---
-            self.game_camera.position = arcade.math.smerp_2d(
-                self.game_camera.position,
-                self.player_sprite.position,
-                delta_time,
-                CAMERA_PAN_SPEED
-            )
-            self.game_camera.position = arcade.camera.grips.constrain_xy(
-                self.game_camera.view_data,
-                self.camera_bounds
-            )
+        pass
 

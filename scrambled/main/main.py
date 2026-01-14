@@ -12,7 +12,7 @@ python -m arcade.examples.sprite_tiled_map_with_levels
 import arcade
 import views.title_view
 
-TILE_SPRITE_SCALING = 0.5
+TILE_SPRITE_SCALING = 1.0
 PLAYER_SCALING = 0.6
 
 WINDOW_WIDTH = 1280
@@ -30,6 +30,9 @@ GRAVITY = 1.1
 
 
 def main():
+    arcade.resources.add_resource_handle("images", "/home/adodds/scrambled/scrambled/images")
+    arcade.resources.add_resource_handle("maps", "/home/adodds/scrambled/scrambled/maps")
+
     window = arcade.Window(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE)
     game = views.title_view.TitleView()
     game.setup()
