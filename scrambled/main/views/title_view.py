@@ -1,7 +1,8 @@
 import arcade
 from arcade import shape_list
+from scrambled.main.views.level1_view import Level1View
 
-TILE_SPRITE_SCALING = 1.0
+TILE_SPRITE_SCALING = 2.0
 PLAYER_SCALING = 0.6
 
 WINDOW_WIDTH = 1280
@@ -54,8 +55,8 @@ class TitleView(arcade.View):
 
         # Sprite lists
 
-        self.game_camera = arcade.Camera2D()
-        self.gui_camera = arcade.Camera2D()
+        #self.game_camera = arcade.Camera2D()
+        #self.gui_camera = arcade.Camera2D()
 
         self.fps_text = arcade.Text('FPS:', 10, 10, arcade.color.BLACK, 14)
         self.game_over_text = arcade.Text(
@@ -80,7 +81,7 @@ class TitleView(arcade.View):
             ":maps:title.json", scaling=TILE_SPRITE_SCALING
         )
 
-        # --- Walls ---
+
 
         # Calculate the right edge of the my_map in pixels
         self.end_of_map = self.tile_map.width * GRID_PIXEL_SIZE
@@ -89,8 +90,6 @@ class TitleView(arcade.View):
         # Set the background color
         if self.tile_map.background_color:
             self.window.background_color = self.tile_map.background_color
-
-
 
         # This is a large rectangle that fills the whole
         # background. The gradient goes between the two colors
@@ -107,20 +106,6 @@ class TitleView(arcade.View):
         rect = shape_list.create_rectangle_filled_with_colors(points, colors)
         self.shapes.append(rect)
 
-
-        max_x = GRID_PIXEL_SIZE * self.tile_map.width
-        max_y = GRID_PIXEL_SIZE * self.tile_map.height
-        limit_y = max_y > self.window.height
-        self.camera_bounds = arcade.LRBT(
-            self.window.width / 2.0,
-            max_x - self.window.width / 2.0,
-            self.window.height / 2.0,
-            max_y - (self.window.height / 2.0 if limit_y else 0.0)
-        )
-
-        # Reset cam
-        self.game_camera.position = self.window.center
-
     def on_draw(self):
         """
         Render the screen.
@@ -130,29 +115,36 @@ class TitleView(arcade.View):
 
         self.shapes.draw()
 
-        with self.game_camera.activate():
+        #with self.game_camera.activate():
             # Draw all the sprites.
-            self.tile_map.sprite_lists["Background"].draw()
+        self.tile_map.sprite_lists["Background"].draw()
 
-        with self.gui_camera.activate():
+        for x in range(0, 1000, 100):
+            for y in range (0, 1000, 100):
+                output = f"x:{x},y:{y}"
+                arcade.draw_text(output, x, y, arcade.color.RED)
+
+       # with self.gui_camera.activate():
             # Put the text on the screen.
             # Adjust the text position based on the view port so that we don't
             # scroll the text too.
-            output = f"FPS: {1/self.window.delta_time:.0f}"
-            arcade.draw_text(
-                output, 10, 20, arcade.color.BLACK, 14
-            )
+        output = f"FPS: {1/self.window.delta_time:.0f}"
+        arcade.draw_text(
+            output, 10, 20, arcade.color.BLACK, 14
+        )
 
-            if self.game_over:
-                self.game_over_text.position = self.window.center
-                self.game_over_text.draw()
+        if self.game_over:
+            self.game_over_text.position = self.window.center
+            self.game_over_text.draw()
 
     def on_key_press(self, key, modifiers):
         """
         Called whenever the mouse moves.
         """
         if key == arcade.key.SPACE:
-            pass #Need to go to main level
+            game_view = Level1View()
+            game_view.setup()
+            self.window.show_view(game_view)
 
 
     def on_update(self, delta_time):
