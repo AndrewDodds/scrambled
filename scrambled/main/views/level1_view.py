@@ -1,12 +1,12 @@
 import arcade
 
-TILE_SPRITE_SCALING = 0.5
-PLAYER_SCALING = 0.6
+TILE_SPRITE_SCALING = 1.5
+PLAYER_SCALING = 1.5
 
 WINDOW_WIDTH = 1280
-WINDOW_HEIGHT = 720
+WINDOW_HEIGHT = 640
 WINDOW_TITLE = "Scrambled"
-SPRITE_PIXEL_SIZE = 128
+SPRITE_PIXEL_SIZE = 32
 GRID_PIXEL_SIZE = SPRITE_PIXEL_SIZE * TILE_SPRITE_SCALING
 CAMERA_PAN_SPEED = 0.15
 
@@ -56,7 +56,7 @@ class Level1View(arcade.View):
 
         # Set up the player
         self.player_sprite = arcade.Sprite(
-            ":resources:images/animated_characters/female_person/femalePerson_idle.png",
+            ":images:player_1.png",
             scale=PLAYER_SCALING,
         )
 
@@ -87,7 +87,7 @@ class Level1View(arcade.View):
 
         # Read in the tiled map
         self.tile_map = arcade.load_tilemap(
-            f":resources:tiled_maps/level_{level}.json", scaling=TILE_SPRITE_SCALING
+            ":maps:level1.json", scaling=TILE_SPRITE_SCALING
         )
 
         # --- Walls ---
@@ -97,7 +97,7 @@ class Level1View(arcade.View):
 
         self.physics_engine = arcade.PhysicsEnginePlatformer(
             self.player_sprite,
-            self.tile_map.sprite_lists["Platforms"],
+            self.tile_map.sprite_lists["Background"],
             gravity_constant=GRAVITY,
         )
 
@@ -128,7 +128,7 @@ class Level1View(arcade.View):
 
         with self.game_camera.activate():
             # Draw all the sprites.
-            self.tile_map.sprite_lists["Platforms"].draw()
+            self.tile_map.sprite_lists["Background"].draw()
             self.player_list.draw()
 
         with self.gui_camera.activate():

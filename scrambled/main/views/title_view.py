@@ -2,8 +2,8 @@ import arcade
 from arcade import shape_list
 from scrambled.main.views.level1_view import Level1View
 
-TILE_SPRITE_SCALING = 2.0
-PLAYER_SCALING = 0.6
+TILE_SPRITE_SCALING = 1.5
+PLAYER_SCALING = 1.5
 
 WINDOW_WIDTH = 1280
 WINDOW_HEIGHT = 640
