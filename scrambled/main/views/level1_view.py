@@ -1,4 +1,5 @@
 import arcade
+from enemy_spawner import EnemySpawner
 
 TILE_SPRITE_SCALING = 1.5
 PLAYER_SCALING = 1.5
@@ -8,12 +9,13 @@ WINDOW_HEIGHT = 640
 WINDOW_TITLE = "Scrambled"
 SPRITE_PIXEL_SIZE = 32
 GRID_PIXEL_SIZE = SPRITE_PIXEL_SIZE * TILE_SPRITE_SCALING
-CAMERA_PAN_SPEED = 0.15
+CAMERA_PAN_SPEED = 5.0
 
 # Physics
 MOVEMENT_SPEED = 5
 JUMP_SPEED = 23
 GRAVITY = 1.1
+
 
 class Level1View(arcade.View):
     """Main application class."""
@@ -29,6 +31,7 @@ class Level1View(arcade.View):
 
         # Sprite lists
         self.player_list = None
+        self.enemy_list = None
 
         # Set up the player
         self.score = 0
@@ -46,13 +49,14 @@ class Level1View(arcade.View):
         self.game_over_text = None
 
         self.level = 1
-        self.max_level = 2
+        self.max_level = 5
 
     def setup(self):
         """Set up the game and initialize the variables."""
 
         # Sprite lists
         self.player_list = arcade.SpriteList()
+        self.enemy_list = arcade.SpriteList()
 
         # Set up the player
         self.player_sprite = arcade.Sprite(
@@ -87,7 +91,7 @@ class Level1View(arcade.View):
 
         # Read in the tiled map
         self.tile_map = arcade.load_tilemap(
-            ":maps:level1.json", scaling=TILE_SPRITE_SCALING
+            f":maps:level{level}.json", scaling=TILE_SPRITE_SCALING
         )
 
         # --- Walls ---
@@ -119,6 +123,9 @@ class Level1View(arcade.View):
         # Reset cam
         self.game_camera.position = self.window.center
 
+        # Spawn enemies for this level
+        self.enemy_list = EnemySpawner().create_enemies(level)
+
     def on_draw(self):
         """
         Render the screen.
@@ -129,6 +136,7 @@ class Level1View(arcade.View):
         with self.game_camera.activate():
             # Draw all the sprites.
             self.tile_map.sprite_lists["Background"].draw()
+            self.enemy_list.draw()
             self.player_list.draw()
 
         with self.gui_camera.activate():
@@ -181,11 +189,16 @@ class Level1View(arcade.View):
         # example though.)
         if not self.game_over:
             self.physics_engine.update()
+            self.enemy_list.update()
+
+            if arcade.check_for_collision_with_list(self.player_sprite, self.enemy_list):
+                self.game_over = True
 
             # --- Manage Scrolling ---
+            target = (self.player_sprite.center_x, self.window.height / 2)
             self.game_camera.position = arcade.math.smerp_2d(
                 self.game_camera.position,
-                self.player_sprite.position,
+                target,
                 delta_time,
                 CAMERA_PAN_SPEED
             )
